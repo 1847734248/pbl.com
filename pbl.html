@@ -1,0 +1,143 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="referrer" content="never"><!-- 破解该图片仅限百度用户内部交流使用 -->
+		<title></title>
+		<style>
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			body{
+				background:rgba(0,0,0,.5);
+			}
+			a{
+				text-decoration: none;
+			}
+			ul li{
+				list-style: none;
+			}
+
+			#ul1{
+				width: 1280px;
+				background: #fff;
+				padding: 10px;
+				margin: 20px auto 0;
+			}
+			#ul1:after{
+				content:"";
+				display: block;
+				clear:both;
+			}
+			#ul1 li{
+				float: left;
+				margin: 0 5px 5px 5px;
+			}
+			#ul1 li .box{
+				position: relative;
+				margin-bottom: 10px;
+				cursor: pointer;
+			}
+			.box img{
+				display: block;
+				width: 310px;
+			}
+			.box .span{
+				position: absolute;
+				bottom: 0;
+				width: 100%;
+				height: 40px;
+				opacity: 0;
+				background-color: rgba(0,0,0,.4);
+				transition: .5s;
+				line-height: 40px;
+				text-align: center;
+				color: #fff;
+			}
+			.box:hover span{
+				opacity: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<ul id="ul1">
+			<li></li>
+			<li></li>
+			<li></li>
+			<li></li>
+		</ul>
+		<script src="ajax.js"></script>
+		<script>
+			var oUl = document.getElementById("ul1");
+			var oLi = document.getElementsByTagName("li");
+			var ilen = oLi.length;
+			var ipage = 1;
+			var bool = true;
+
+			getList();
+			function getList(){
+				ajax('get','getImage.php','page=' + ipage,function(data){
+					var data = JSON.parse(data);
+					var dataList = data.list;
+					if( !data.num )return;
+					for( var i=0;i<dataList.length;i++ ){
+						var shortLi = getShort();
+
+						var oDiv = document.createElement("div");
+						var a = document.createElement("a");
+						var Img = document.createElement("img");
+						var Span = document.createElement("span");
+
+						oDiv.className = "box";
+						
+						Img.src = dataList[i].image;
+						Img.height = dataList[i].imageH * (310 / dataList[i].imageW );
+						Span.innerHTML = dataList[i].name;
+						Span.className = "span";
+						
+						oDiv.appendChild( Img );
+						oDiv.appendChild( Span );
+						oDiv.appendChild( a );
+				
+						oLi[shortLi].appendChild( oDiv );
+					}
+					bool = true;
+				});	
+			}
+
+			window.onscroll = function(){
+				var shortLi = getShort();
+				var li = oLi[shortLi];
+				var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+				if( getTop(li) + li.offsetHeight < document.documentElement.clientHeight + scrollTop ){
+					if(bool){
+						bool = false;
+						ipage++;
+						getList();
+					}
+				}
+			}
+			function getTop(obj){
+				var iTop = 0;
+				while(obj){
+					iTop += obj.offsetTop;
+					obj = obj.offsetParent;
+				}
+				return iTop;
+			}
+
+			function getShort(){
+				var index = 0;
+				var ih = oLi[index].offsetHeight;
+				for(var i=1;i<ilen;i++){
+					if( oLi[i].offsetHeight < ih){
+						index = i;
+						ih = oLi[i].offsetHeight;
+					}
+				}
+				return index;
+			}
+		</script>
+	</body>
+</html>
